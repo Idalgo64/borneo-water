@@ -39,8 +39,8 @@
 
   // mapping 2000 -> 2000ms ; 4500 -> 400ms
   function precipToInterval(msValue) {
-    const minP = 2000, maxP = 4500;
-    const minI = 400, maxI = 2000;
+    const minP = 2500, maxP = 4500;
+    const minI = 100, maxI = 2000;
     const t = Math.min(1, Math.max(0, (msValue - minP) / (maxP - minP)));
     return Math.round(maxI - t * (maxI - minI));
   }
