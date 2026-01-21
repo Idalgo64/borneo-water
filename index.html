@@ -40,7 +40,7 @@
   // mapping 2000 -> 2000ms ; 4500 -> 400ms
   function precipToInterval(msValue) {
     const minP = 2500, maxP = 4500;
-    const minI = 100, maxI = 2000;
+    const minI = 10, maxI = 2000;
     const t = Math.min(1, Math.max(0, (msValue - minP) / (maxP - minP)));
     return Math.round(maxI - t * (maxI - minI));
   }
@@ -85,7 +85,7 @@
     "pointermove",
     (e) => {
       const now = performance.now();
-      if (now - last > 700) {
+      if (now - last > 300) {
         addRipple(e.clientX, e.clientY);
         last = now;
       }
@@ -99,7 +99,7 @@
 
     for (let i = ripples.length - 1; i >= 0; i--) {
       const p = ripples[i];
-      p.r += 0.35;
+      p.r += 0.55;
       p.a *= 0.985;
 
       ctx.beginPath();
