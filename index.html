@@ -85,7 +85,7 @@
     "pointermove",
     (e) => {
       const now = performance.now();
-      if (now - last > 100) {
+      if (now - last > 50) {
         addRipple(e.clientX, e.clientY);
         last = now;
       }
