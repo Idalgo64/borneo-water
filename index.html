@@ -85,7 +85,7 @@
     "pointermove",
     (e) => {
       const now = performance.now();
-      if (now - last > 300) {
+      if (now - last > 100) {
         addRipple(e.clientX, e.clientY);
         last = now;
       }
@@ -99,8 +99,8 @@
 
     for (let i = ripples.length - 1; i >= 0; i--) {
       const p = ripples[i];
-      p.r += 0.55;
-      p.a *= 0.985;
+      p.r += 0.85;
+      p.a *= 0.905;
 
       ctx.beginPath();
       ctx.strokeStyle = `rgba(190,230,255,${p.a})`;
