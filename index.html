@@ -12,51 +12,109 @@
 <body>
   <canvas id="c"></canvas>
   <script>
-    const canvas = document.getElementById("c");
-    const ctx = canvas.getContext("2d");
-    let ripples = [];
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  let ripples = [];
 
-    function resize() {
-      const dpr = Math.max(1, window.devicePixelRatio || 1);
-      canvas.width = Math.floor(window.innerWidth * dpr);
-      canvas.height = Math.floor(window.innerHeight * dpr);
-      canvas.style.width = window.innerWidth + "px";
-      canvas.style.height = window.innerHeight + "px";
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  function resize() {
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width = Math.floor(window.innerWidth * dpr);
+    canvas.height = Math.floor(window.innerHeight * dpr);
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  // ✅ IMPORTANT : addRipple doit être défini AVANT la pluie
+  function addRipple(x, y) {
+    ripples.push({ x, y, r: 2, a: 0.35 });
+    if (ripples.length > 80) ripples.shift();
+  }
+
+  // ====== PLUIE (réglable via précipitations) ======
+  let precipitation = 3000; // valeur par défaut
+  let rainTimer = null;
+
+  // mapping 2000 -> 2000ms ; 4500 -> 400ms
+  function precipToInterval(msValue) {
+    const minP = 2000, maxP = 4500;
+    const minI = 400, maxI = 2000;
+    const t = Math.min(1, Math.max(0, (msValue - minP) / (maxP - minP)));
+    return Math.round(maxI - t * (maxI - minI));
+  }
+
+  // ajoute une "goutte" = 3 cercles collés
+  function spawnRainDrop() {
+    const x = Math.random() * window.innerWidth;
+    const y = Math.random() * window.innerHeight;
+
+    const offsets = [
+      { dx: 0, dy: 0 },
+      { dx: 10, dy: 4 },
+      { dx: -8, dy: 6 },
+    ];
+
+    offsets.forEach((o) => addRipple(x + o.dx, y + o.dy));
+  }
+
+  function restartRain() {
+    if (rainTimer) clearInterval(rainTimer);
+    const interval = precipToInterval(precipitation);
+    rainTimer = setInterval(spawnRainDrop, interval);
+  }
+
+  // écoute la valeur envoyée depuis Framer
+  window.addEventListener("message", (event) => {
+    if (!event.data) return;
+    if (event.data.type === "PRECIPITATION") {
+      const v = Number(event.data.value);
+      if (!Number.isFinite(v)) return;
+      precipitation = v;
+      restartRain();
     }
-    resize();
-    window.addEventListener("resize", resize);
+  });
 
-    function addRipple(x, y) {
-      ripples.push({ x, y, r: 2, a: 0.35 });
-      if (ripples.length > 80) ripples.shift();
-    }
+  // démarre la pluie
+  restartRain();
 
-    let last = 0;
-    window.addEventListener("pointermove", (e) => {
+  // ====== Ripple du curseur (tu gardes bien celui-là ✅) ======
+  let last = 0;
+  window.addEventListener(
+    "pointermove",
+    (e) => {
       const now = performance.now();
       if (now - last > 700) {
         addRipple(e.clientX, e.clientY);
         last = now;
       }
-    }, { passive: true });
+    },
+    { passive: true }
+  );
 
-    function tick() {
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      for (let i = ripples.length - 1; i >= 0; i--) {
-        const p = ripples[i];
-        p.r += 0.35;
-        p.a *= 0.985;
-        ctx.beginPath();
-        ctx.strokeStyle = `rgba(190,230,255,${p.a})`;
-        ctx.lineWidth = 1.3;
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.stroke();
-        if (p.a < 0.02) ripples.splice(i, 1);
-      }
-      requestAnimationFrame(tick);
+  // ====== Animation globale ======
+  function tick() {
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+    for (let i = ripples.length - 1; i >= 0; i--) {
+      const p = ripples[i];
+      p.r += 0.35;
+      p.a *= 0.985;
+
+      ctx.beginPath();
+      ctx.strokeStyle = `rgba(190,230,255,${p.a})`;
+      ctx.lineWidth = 1.3;
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.stroke();
+
+      if (p.a < 0.02) ripples.splice(i, 1);
     }
-    tick();
-  </script>
+
+    requestAnimationFrame(tick);
+  }
+  tick();
+</script>
+
 </body>
 </html>
