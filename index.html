@@ -35,7 +35,7 @@
     let last = 0;
     window.addEventListener("pointermove", (e) => {
       const now = performance.now();
-      if (now - last > 45) {
+      if (now - last > 60) {
         addRipple(e.clientX, e.clientY);
         last = now;
       }
