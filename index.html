@@ -45,8 +45,8 @@
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
       for (let i = ripples.length - 1; i >= 0; i--) {
         const p = ripples[i];
-        p.r += 0.9;
-        p.a *= 0.975;
+        p.r += 0.35;
+        p.a *= 0.985;
         ctx.beginPath();
         ctx.strokeStyle = `rgba(190,230,255,${p.a})`;
         ctx.lineWidth = 1.3;
